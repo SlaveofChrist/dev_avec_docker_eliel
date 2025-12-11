@@ -1,4 +1,5 @@
 .DS_Store
 .env
 corrections/*
-node_modules
+postgres-data
+
