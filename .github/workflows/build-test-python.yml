@@ -19,14 +19,13 @@ jobs:
         run: docker ps --filter name=python-api
       - name: Check container logs
         run: |
-          sleep 5
           docker logs python-api
-          docker logs python-api | grep -i "running" 
+          docker logs python-api | grep -i "Started" 
       - name: test container response
         run: |
           sleep 5
           curl -f http://localhost:5000/
       - name: stop and remove container
         run: |
-          docker stop monapp_test
-          docker rm monapp_test
+          docker stop python-api
+          docker rm python-api
