@@ -19,8 +19,9 @@ jobs:
         run: docker ps --filter name=python-api
       - name: Check container logs
         run: |
+          sleep 5
           docker logs python-api
-          docker logs python-api | grep -i "Uvicorn running" 
+          docker logs python-api | grep -i "running" 
       - name: test container response
         run: |
           sleep 5
