@@ -20,7 +20,7 @@ jobs:
       - name: Check container logs
         run: |
           docker logs python-api
-          docker logs python-api | grep -i "started" 
+          docker logs python-api | grep -i "Uvicorn running" 
       - name: test container response
         run: |
           sleep 5
