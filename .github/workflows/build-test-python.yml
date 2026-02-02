@@ -1,0 +1,31 @@
+name: "1 - Build & Test Python"
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Build Docker image
+        run: docker build -f python.Dockerfile -t python-api:latest .
+      - name: Run container
+        run: docker run -d --name python-api -p 5000:5000 python-api:latest
+      - name: check container status
+        run: docker ps --filter name=python-api
+      - name: Check container logs
+        run: |
+          docker logs python-api
+          docker logs python-api | grep -i "started" 
+      - name: test container response
+        run: |
+          sleep 5
+          curl -f http://localhost:5000/
+      - name: stop and remove container
+        run: |
+          docker stop monapp_test
+          docker rm monapp_test
