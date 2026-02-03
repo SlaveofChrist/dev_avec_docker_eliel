@@ -1,0 +1,31 @@
+name: "2 - Security Scan"
+
+on:
+  workflow_run:
+    workflows: ["1 - Build & Test Python"] # Déclencheur après le workflow 1 
+    types: [completed]
+
+jobs:
+  trivy-scan:
+    # On ne lance le scan que si le build précédent a réussi 
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Scan infrastructure images
+        uses: aquasecurity/trivy-action@master
+        with:
+          # On scanne les images citées dans le TP [cite: 32]
+          image-ref: 'nginx:alpine'
+          format: 'table'
+          exit-code: '1' # Fait échouer le job si une vulnérabilité est trouvée
+          severity: 'CRITICAL'
+
+      - name: Scan Postgres image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'postgres:alpine'
+          severity: 'CRITICAL'
+          exit-code: '1'
