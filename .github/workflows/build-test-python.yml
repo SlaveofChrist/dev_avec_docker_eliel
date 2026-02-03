@@ -1,4 +1,5 @@
 name: "1 - Build & Test Python"
+
 on:
   push:
     branches: [ "main" ]
@@ -10,22 +11,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Build Docker image
-        run: docker build -f python.Dockerfile -t python-api:latest .
-      - name: Run container
-        run: docker run -d --name python-api -p 8000:8000 python-api:latest
-      - name: check container status
-        run: docker ps --filter name=python-api
-      - name: Check container logs
+        uses: actions/checkout@v4 
+
+      - name: Build manual of Docker image
+        # On build l'image localement sans la push sur un registre pour l'instant
+        run: docker build -f python.Dockerfile -t python-api:latest . 
+
+      - name: Run container in detached mode
+        # On utilise le port 8000 défini dans votre Dockerfile et requirements
+        run: docker run -d --name python-api -p 8000:8000 python-api:latest 
+
+      - name: Wait for service and Check logs
+        # On attend que l'application soit prête et on affiche les logs
         run: |
-          docker logs python-api
-      - name: test container response
+          echo "Waiting for Uvicorn to start..."
+          sleep 10
+          docker logs python-api 
+          
+      - name: Smoke Test (Curl response)
+        # Vérification que le conteneur répond correctement sur le port 8000
         run: |
-          sleep 5
-          docker ps --filter name=python-api 
-          curl -f http://localhost:8000/
-      - name: stop and remove container
+          curl -f http://localhost:8000/ || (docker logs python-api && exit 1)
+
+      - name: Cleanup
+        if: always()
         run: |
           docker stop python-api
           docker rm python-api
