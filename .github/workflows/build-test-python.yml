@@ -23,6 +23,7 @@ jobs:
       - name: test container response
         run: |
           sleep 5
+          docker ps --filter name=python-api 
           curl -f http://localhost:8000/
       - name: stop and remove container
         run: |
