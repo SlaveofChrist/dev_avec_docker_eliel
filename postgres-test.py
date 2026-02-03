@@ -13,23 +13,31 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"])
+def get_db_connection():
+    try: 
+        return psycopg2.connect(
+            host=os.getenv("POSTGRES_HOST"),
+            port=5432,
+            user=os.getenv("POSTGRES_USER", "postgres"),
+            password=os.getenv("POSTGRES_PASSWORD"),
+            database=os.getenv("POSTGRES_DB", "tp_note")
+            )
+    except Exception as e:
+        print(f"Avertissement : Connexion DB impossible ({e})")
+        return None
+    # Connexion
 
-# Connexion
-conn = psycopg2.connect(
-    host=os.getenv("POSTGRES_HOST"),
-    port=5432,
-    user=os.getenv("POSTGRES_USER", "postgres"),
-    password=os.getenv("POSTGRES_PASSWORD"),
-    database=os.getenv("POSTGRES_DB", "tp_note")
-)
 try: 
     r = redis.Redis(host='redis', port=6379, db=0, decode_responses=True, socket_connect_timeout=2)
     r.ping() # On vérifie réellement la connexion
-except (redis.Exceptions.ConnectionError, Exception):
+except (redis.exceptions.ConnectionError, Exception):
     r = None # Dégradation : on continue sans cache
 
 @app.get('/')
 async def get_students():
+    conn = get_db_connection()
+    if conn is None:
+        return {"status": "warning", "message": "Mode dégradé : DB non connectée"}
     total_views = 0
     
     # --- ÉTAPE 1 : Tentative Redis (Dégradation élégante) ---
