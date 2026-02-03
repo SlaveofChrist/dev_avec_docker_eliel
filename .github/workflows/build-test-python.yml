@@ -14,7 +14,7 @@ jobs:
       - name: Build Docker image
         run: docker build -f python.Dockerfile -t python-api:latest .
       - name: Run container
-        run: docker run -d --name python-api -p 8000:8000 python-api:latest uvicorn postgres-test:app --proxy-headers --host 0.0.0.0 --port 8000
+        run: docker run -d --name python-api -p 8000:8000 python-api:latest
       - name: check container status
         run: docker ps --filter name=python-api
       - name: Check container logs
